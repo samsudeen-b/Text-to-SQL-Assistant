@@ -44,39 +44,27 @@ QueryAI uses Groq's LLaMA model to convert the question into a SQL query, execut
 
 
 
-\## Architecture
-
-
-
-```text
-
-User Question
-
-&#x20;     ↓
-
-Frontend
-
-&#x20;     ↓
-
-FastAPI Backend
-
-&#x20;     ↓
-
-Groq LLaMA
-
-&#x20;     ↓
-
-SQL Query
-
-&#x20;     ↓
-
-SQLite Database
-
-&#x20;     ↓
-
-Query Results
-
-&#x20;     ↓
-
-Frontend
-
+┌─────────────────┐
+│   User Question │
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│    Frontend     │
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│  FastAPI API    │
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│  Groq LLaMA AI  │
+│  Text → SQL     │
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│ SQLite Database │
+└────────┬────────┘
+         ↓
+┌─────────────────┐
+│ Query Results   │
+└─────────────────┘
