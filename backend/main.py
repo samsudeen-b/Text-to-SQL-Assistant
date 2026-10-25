@@ -1,6 +1,8 @@
 import os
 import sqlite3
 import pandas as pd
+from pathlib import Path
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -18,9 +20,15 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
-DB_PATH = "store.db"
+
+ROOT = Path(__file__).resolve().parent.parent
+DB_PATH = ROOT / "store.db"
+
+
+@app.get("/")
+def homepage():
+    return FileResponse(ROOT / "frontend" / "index.html")
 
 DB_SCHEMA = """
 Table: customers
@@ -68,6 +76,10 @@ Question:
 SQL:
 """
 
+    api_key = os.getenv("GROQ_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="GROQ_API_KEY is not configured.")
+    client = Groq(api_key=api_key, timeout=25.0, max_retries=0)
     response = client.chat.completions.create(
         model="llama-3.3-70b-versatile",
         temperature=0,
@@ -87,7 +99,7 @@ def run_query(sql):
     if not sql.lower().startswith("select"):
         raise ValueError("Only SELECT queries are allowed.")
 
-    conn = sqlite3.connect(DB_PATH)
+    conn = sqlite3.connect(f"{DB_PATH.as_uri()}?mode=ro", uri=True)
 
     try:
         df = pd.read_sql_query(sql, conn)
@@ -117,5 +129,7 @@ def query(request: QueryRequest):
             "rows": df.fillna("").to_dict(orient="records"),
         }
 
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=500, detail="Query failed. Please try a simpler question or check the server logs.")
