@@ -1,0 +1,10 @@
+[project]
+name = "queryai"
+version = "0.1.0"
+requires-python = ">=3.12,<3.13"
+
+[tool.vercel]
+entrypoint = "backend.main:app"
+
+[tool.vercel.scripts]
+build = "python build.py"
