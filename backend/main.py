@@ -81,7 +81,7 @@ SQL:
         raise HTTPException(status_code=503, detail="GROQ_API_KEY is not configured.")
     client = Groq(api_key=api_key, timeout=25.0, max_retries=0)
     response = client.chat.completions.create(
-        model="llama-3.3-70b-versatile",
+        model=os.getenv("GROQ_MODEL", "openai/gpt-oss-20b"),
         temperature=0,
         messages=[{"role": "user", "content": prompt}],
     )
