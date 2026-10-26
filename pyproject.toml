@@ -2,6 +2,16 @@
 name = "queryai"
 version = "0.1.0"
 requires-python = ">=3.12,<3.13"
+dependencies = [
+    "fastapi",
+    "groq",
+    "pandas",
+    "python-dotenv",
+    "uvicorn",
+]
+
+[tool.setuptools]
+packages = []
 
 [tool.vercel]
 entrypoint = "backend.main:app"
