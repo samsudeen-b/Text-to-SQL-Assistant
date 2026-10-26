@@ -6,7 +6,7 @@
 4. Add GROQ_API_KEY in Environment Variables for Production and Preview. Never commit its value.
 5. Deploy. Open /api/health, then ask "Show all customers from Chennai" on the homepage.
 
-The build generates store.db from fictional sample data and stages frontend/index.html in public/. The API opens the database read-only. It does not store user edits. Use a hosted database if persistent writes are needed.
+The build stages frontend/index.html in public/. The API creates its fictional sample database in memory for each query, so it does not store user edits. Use a hosted database if persistent writes are needed.
 
 Local run:
 
@@ -17,3 +17,4 @@ uvicorn backend.main:app --reload
 ```
 
 Open http://127.0.0.1:8000 (not the HTML file directly). Set GROQ_API_KEY in your environment or a local .env file. The original Streamlit app.py remains separate from the Vercel entrypoint.
+

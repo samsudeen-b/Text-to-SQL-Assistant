@@ -1,5 +1,6 @@
 import os
 import sqlite3
+import logging
 import pandas as pd
 from pathlib import Path
 from fastapi.responses import FileResponse
@@ -8,8 +9,10 @@ from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from groq import Groq
+from database import initialize_database
 
 load_dotenv()
+logger = logging.getLogger(__name__)
 
 app = FastAPI(title="QueryAI API")
 
@@ -23,9 +26,6 @@ app.add_middleware(
 
 
 ROOT = Path(__file__).resolve().parent.parent
-DB_PATH = ROOT / "store.db"
-
-
 @app.get("/")
 def homepage():
     return FileResponse(ROOT / "frontend" / "index.html")
@@ -99,9 +99,12 @@ def run_query(sql):
     if not sql.lower().startswith("select"):
         raise ValueError("Only SELECT queries are allowed.")
 
-    conn = sqlite3.connect(f"{DB_PATH.as_uri()}?mode=ro", uri=True)
+    # Vercel functions do not provide a persistent writable filesystem.
+    # Rebuild the small fictional demo database in memory for each query.
+    conn = sqlite3.connect(":memory:")
 
     try:
+        initialize_database(conn)
         df = pd.read_sql_query(sql, conn)
         return df
     finally:
@@ -132,4 +135,5 @@ def query(request: QueryRequest):
     except HTTPException:
         raise
     except Exception:
+        logger.exception("Text-to-SQL query failed")
         raise HTTPException(status_code=500, detail="Query failed. Please try a simpler question or check the server logs.")
