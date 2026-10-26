@@ -1,8 +1,8 @@
 import sqlite3
 
-def create_database():
-    # Connect to (or create) our database file
-    conn = sqlite3.connect("store.db")
+
+def initialize_database(conn):
+    """Create and populate the demo schema on an existing connection."""
     cursor = conn.cursor()
 
     # ---- Create customers table ----
@@ -79,8 +79,14 @@ def create_database():
         "INSERT OR IGNORE INTO orders VALUES (?, ?, ?, ?, ?)", orders
     )
 
-    # Save changes and close
+    # Save changes
     conn.commit()
+
+
+def create_database():
+    # Connect to (or create) our database file for local development
+    conn = sqlite3.connect("store.db")
+    initialize_database(conn)
     conn.close()
     print("✅ Database created successfully as store.db")
 
